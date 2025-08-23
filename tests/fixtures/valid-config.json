@@ -1,0 +1,40 @@
+{
+  "version": "1.0",
+  "outputSchemas": {
+    "ResultString": {
+      "type": "object",
+      "properties": {
+        "result": { "type": "string", "description": "The result as plain text" }
+      },
+      "required": ["result"]
+    }
+  },
+  "mcpServers": {
+    "calculator_stdio": {
+      "type": "stdio",
+      "name": "Calculator MCP",
+      "fullCommand": "uvx",
+      "args": ["mcp-server-calculator"]
+    }
+  },
+  "agents": {
+    "calculator_agent": {
+      "name": "calculator_agent",
+      "instructions": "You are a calculator agent.",
+      "outputSchemaRef": "ResultString",
+      "modelSettings": { "store": false, "temperature": 0 },
+      "mcpServerRefs": ["calculator_stdio"],
+      "tools": []
+    }
+  },
+  "flow": {
+    "steps": [
+      {
+        "id": "step1",
+        "type": "single_agent",
+        "agentRef": "calculator_agent",
+        "io": { "carryHistory": true }
+      }
+    ]
+  }
+}

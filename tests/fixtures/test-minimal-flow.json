@@ -1,0 +1,33 @@
+{
+  "version": "1.0",
+  "outputSchemas": {
+    "ResultString": {
+      "type": "object",
+      "properties": {
+        "result": { "type": "string", "description": "The result as plain text" }
+      },
+      "required": ["result"]
+    }
+  },
+  "mcpServers": {},
+  "agents": {
+    "test_agent": {
+      "name": "test_agent",
+      "instructions": "You are a test agent. Always respond with 'Test response' in the result property.",
+      "outputSchemaRef": "ResultString",
+      "modelSettings": { "store": false, "temperature": 0.1 },
+      "mcpServerRefs": [],
+      "tools": []
+    }
+  },
+  "flow": {
+    "steps": [
+      {
+        "id": "step1",
+        "type": "single_agent",
+        "agentRef": "test_agent",
+        "io": { "carryHistory": true }
+      }
+    ]
+  }
+}
