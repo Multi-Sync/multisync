@@ -20,7 +20,7 @@ We take security vulnerabilities seriously. If you discover a security issue, pl
 
 ### 📧 Report Process
 
-1. **Email Security Team**: Send details to [security@multisync.io](mailto:security@multisync.io)
+1. **Email Security Team**: Send details to [contact@multisync.io](mailto:contact@multisync.io)
 2. **Include Details**:
    - Description of the vulnerability
    - Steps to reproduce
@@ -95,7 +95,7 @@ We follow a coordinated disclosure policy:
 
 ### Security Team
 
-- **Email**: [security@multisync.io](mailto:security@multisync.io)
+- **Email**: [contact@multisync.io](mailto:contact@multisync.io)
 - **PGP Key**: Available upon request
 - **Response Time**: 24-48 hours
 
