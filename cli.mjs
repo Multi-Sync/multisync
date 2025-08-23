@@ -14,7 +14,8 @@ Options:
   --help               Show this help message
 
 Examples:
-  multisync --setup
+  multisync              # Start interactive mode
+  multisync --setup      # Run system setup
   multisync --config=test.json
   multisync --config=test.json --verbose
 `);
@@ -51,13 +52,61 @@ export async function runSetup() {
   console.log('💡 Next: Run multisync --config=your-config.json');
 }
 
+async function runInteractiveMode() {
+  const readline = await import('node:readline/promises');
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  console.log('🚀 Multisync Interactive Mode');
+  console.log('Type your questions and press Enter. Type "exit" to quit.\n');
+
+  // Continuous input loop
+  async function askQuestion() {
+    try {
+      const input = await rl.question('> ');
+
+      if (input.toLowerCase().trim() === 'exit') {
+        console.log('👋 Goodbye!');
+        rl.close();
+        return;
+      }
+
+      if (input.trim() === '') {
+        // Skip empty input, ask again
+        askQuestion();
+        return;
+      }
+
+      // Process the input (you can customize this part)
+      console.log(`📝 Processing: "${input}"`);
+
+      // For now, just echo back - you can integrate with your parser here
+      console.log(`💬 Response: I received your question: "${input}"\n`);
+
+      // Ask for next question (recursive call)
+      askQuestion();
+
+    } catch (error) {
+      console.error(`❌ Error processing input: ${error.message}`);
+      // Continue asking questions even if there's an error
+      askQuestion();
+    }
+  }
+
+  // Start the continuous loop
+  askQuestion();
+}
+
 async function main() {
   try {
     const args = process.argv.slice(2);
 
     if (args.length === 0) {
-      showHelp();
-      process.exit(1);
+      // No arguments - start interactive mode
+      await runInteractiveMode();
+      return;
     }
 
     const flags = parseArgs(args);

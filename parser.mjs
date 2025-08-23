@@ -10,7 +10,6 @@ import { validateSystem } from './validator.mjs';
 
 /* ------------------------------ Small helpers ------------------------------ */
 
-const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 const warn = (...a) => console.warn('[warn]', ...a);
 const die = (msg, code = 1) => { console.error(msg); process.exit(code); };
 
