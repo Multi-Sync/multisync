@@ -1,0 +1,166 @@
+{
+  "version": "1.0",
+  "outputSchemas": {
+    "ArabicTranslation": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "object",
+          "properties": {
+            "originalQuery": { "type": "string", "description": "The original user question" },
+            "arabicQuery": { "type": "string", "description": "The question translated to Arabic" }
+          },
+          "required": ["originalQuery", "arabicQuery"]
+        }
+      },
+      "required": ["result"]
+    },
+    "FrenchTranslation": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "object",
+          "properties": {
+            "originalQuery": { "type": "string", "description": "The original user question" },
+            "arabicQuery": { "type": "string", "description": "The question translated to Arabic" },
+            "frenchQuery": { "type": "string", "description": "The question translated to French" }
+          },
+          "required": ["originalQuery", "arabicQuery", "frenchQuery"]
+        }
+      },
+      "required": ["result"]
+    },
+    "EnglishTranslation": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "object",
+          "properties": {
+            "originalQuery": { "type": "string", "description": "The original user question" },
+            "arabicQuery": { "type": "string", "description": "The question translated to Arabic" },
+            "frenchQuery": { "type": "string", "description": "The question translated to French" },
+            "englishQuery": { "type": "string", "description": "The question translated to English" }
+          },
+          "required": ["originalQuery", "arabicQuery", "frenchQuery", "englishQuery"]
+        }
+      },
+      "required": ["result"]
+    },
+    "FinalOutput": {
+      "type": "object",
+      "properties": {
+        "result": {
+          "type": "object",
+          "properties": {
+            "originalQuery": { "type": "string", "description": "The original user question" },
+            "arabicQuery": { "type": "string", "description": "The question translated to Arabic" },
+            "frenchQuery": { "type": "string", "description": "The question translated to French" },
+            "englishQuery": { "type": "string", "description": "The question translated to English" },
+            "final": { "type": "string", "enum": ["true"], "description": "Indicates this is the final output" }
+          },
+          "required": ["originalQuery", "arabicQuery", "frenchQuery", "englishQuery", "final"]
+        }
+      },
+      "required": ["result"]
+    }
+  },
+  "mcpServers": {},
+  "agents": {
+    "arabic_translator": {
+      "name": "Arabic Translator",
+      "instructions": "You are an expert Arabic translator. Take the user's question and translate it to Arabic. Always return your response in the result property with originalQuery (the user's input) and arabicQuery (your Arabic translation). Ensure the Arabic translation is accurate and natural.",
+      "outputSchemaRef": "ArabicTranslation",
+      "modelSettings": { "store": false, "temperature": 0.3 },
+      "mcpServerRefs": [],
+      "tools": []
+    },
+    "arabic_reviewer": {
+      "name": "Arabic Translation Reviewer",
+      "instructions": "You are an Arabic language expert. Review the Arabic translation for accuracy, grammar, and naturalness. Only evaluate the Arabic translation quality. If the translation is good, approve it. If it needs improvement, provide specific feedback. Focus only on Arabic translation quality.",
+      "outputSchemaRef": "ArabicTranslation",
+      "modelSettings": { "store": false, "temperature": 0.2 },
+      "mcpServerRefs": [],
+      "tools": []
+    },
+    "french_translator": {
+      "name": "French Translator",
+      "instructions": "You are an expert French translator. Take the user's question and translate it to French. You will receive the original query and Arabic translation. Always return your response in the result property with originalQuery, arabicQuery, and frenchQuery (your French translation). Ensure the French translation is accurate and natural.",
+      "outputSchemaRef": "FrenchTranslation",
+      "modelSettings": { "store": false, "temperature": 0.3 },
+      "mcpServerRefs": [],
+      "tools": []
+    },
+    "french_reviewer": {
+      "name": "French Translation Reviewer",
+      "instructions": "You are a French language expert. Review the French translation for accuracy, grammar, and naturalness. Only evaluate the French translation quality. If the translation is good, approve it. If it needs improvement, provide specific feedback. Focus only on French translation quality.",
+      "outputSchemaRef": "FrenchTranslation",
+      "modelSettings": { "store": false, "temperature": 0.2 },
+      "mcpServerRefs": [],
+      "tools": []
+    },
+    "english_translator": {
+      "name": "English Translator",
+      "instructions": "You are an expert English translator. Take the user's question and translate it to English. You will receive the original query, Arabic translation, and French translation. Always return your response in the result property with originalQuery, arabicQuery, frenchQuery, and englishQuery (your English translation). Ensure the English translation is accurate and natural.",
+      "outputSchemaRef": "EnglishTranslation",
+      "modelSettings": { "store": false, "temperature": 0.3 },
+      "mcpServerRefs": [],
+      "tools": []
+    },
+    "output_formatter": {
+      "name": "Output Formatter",
+      "instructions": "You are a final output formatter. Review all translations and ensure they are complete and properly formatted. Your job is to create the final output with all translations. Always return your response in the result property with originalQuery, arabicQuery, frenchQuery, englishQuery, and final set to 'true'. Verify that all translations are present and properly formatted.",
+      "outputSchemaRef": "FinalOutput",
+      "modelSettings": { "store": false, "temperature": 0.1 },
+      "mcpServerRefs": [],
+      "tools": []
+    }
+  },
+  "flow": {
+    "steps": [
+      {
+        "id": "step1",
+        "type": "single_agent",
+        "agentRef": "arabic_translator",
+        "io": { "carryHistory": true }
+      },
+      {
+        "id": "step2",
+        "type": "agent_reviewer",
+        "proposalAgentRef": "arabic_translator",
+        "reviewerAgentRef": "arabic_reviewer",
+        "passCondition": "result.arabicQuery && result.arabicQuery.length > 0",
+        "maxTurns": 2,
+        "feedbackInjection": "as_user",
+        "io": { "carryHistory": true }
+      },
+      {
+        "id": "step3",
+        "type": "single_agent",
+        "agentRef": "french_translator",
+        "io": { "carryHistory": true }
+      },
+      {
+        "id": "step4",
+        "type": "agent_reviewer",
+        "proposalAgentRef": "french_translator",
+        "reviewerAgentRef": "french_reviewer",
+        "passCondition": "result.frenchQuery && result.frenchQuery.length > 0",
+        "maxTurns": 3,
+        "feedbackInjection": "as_user",
+        "io": { "carryHistory": true }
+      },
+      {
+        "id": "step5",
+        "type": "single_agent",
+        "agentRef": "english_translator",
+        "io": { "carryHistory": true }
+      },
+      {
+        "id": "step6",
+        "type": "single_agent",
+        "agentRef": "output_formatter",
+        "io": { "carryHistory": true }
+      }
+    ]
+  }
+}
