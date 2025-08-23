@@ -1,7 +1,28 @@
 {
   "name": "multisync",
   "version": "1.0.0",
-  "description": "Multi-agent workflow orchestrator",
+  "description": "Multi-agent workflow orchestrator for AI-powered task automation",
+  "keywords": [
+    "ai",
+    "workflow",
+    "orchestration",
+    "multi-agent",
+    "automation",
+    "openai",
+    "mcp",
+    "cli",
+    "nodejs"
+  ],
+  "author": "Multisync Team",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Multi-Sync/multisync.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Multi-Sync/multisync/issues"
+  },
+  "homepage": "https://github.com/Multi-Sync/multisync#readme",
   "main": "cli.mjs",
   "bin": {
     "multisync": "./cli.mjs"
@@ -12,11 +33,13 @@
     "test": "node --experimental-vm-modules node_modules/.bin/jest --forceExit --detectOpenHandles",
     "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch --forceExit",
     "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage --forceExit --detectOpenHandles",
-    "test:ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --coverage --watchAll=false --forceExit --detectOpenHandles"
+    "test:ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --coverage --watchAll=false --forceExit --detectOpenHandles",
+    "lint": "eslint *.mjs tests/**/*.mjs",
+    "lint:fix": "eslint *.mjs tests/**/*.mjs --fix",
+    "format": "prettier --write *.mjs tests/**/*.mjs",
+    "format:check": "prettier --check *.mjs tests/**/*.mjs",
+    "prepare": "npm run lint && npm run test"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "@openai/agents": "^0.0.17",
     "zod": "^3.25.76"
@@ -24,7 +47,11 @@
   "devDependencies": {
     "@babel/core": "^7.24.0",
     "@babel/preset-env": "^7.24.0",
+    "@eslint/js": "^9.34.0",
     "babel-jest": "^30.0.5",
-    "jest": "^29.7.0"
+    "eslint": "^9.34.0",
+    "globals": "^16.3.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.6.2"
   }
 }

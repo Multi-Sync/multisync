@@ -47,7 +47,10 @@ describe('CLI Direct Integration Tests', () => {
 
   describe('parseArgs Function Integration', () => {
     test('should parse template config paths correctly', () => {
-      const args = ['--config=templates/example-minimal-flow.json', '--verbose'];
+      const args = [
+        '--config=templates/example-minimal-flow.json',
+        '--verbose',
+      ];
       const result = parseArgs(args);
 
       expect(result.config).toBe('templates/example-minimal-flow.json');
@@ -82,7 +85,9 @@ describe('CLI Direct Integration Tests', () => {
       await expect(runSetup()).resolves.not.toThrow();
 
       expect(console.log).toHaveBeenCalledWith('🔧 Running system setup...\n');
-      expect(console.log).toHaveBeenCalledWith('✅ System setup completed successfully!');
+      expect(console.log).toHaveBeenCalledWith(
+        '✅ System setup completed successfully!',
+      );
     });
   });
 
@@ -140,14 +145,18 @@ describe('CLI Direct Integration Tests', () => {
 
   describe('Error Handling Integration', () => {
     test('should handle invalid arguments gracefully', () => {
-      expect(() => parseArgs(['--invalid-flag'])).toThrow('Unknown argument: --invalid-flag');
+      expect(() => parseArgs(['--invalid-flag'])).toThrow(
+        'Unknown argument: --invalid-flag',
+      );
     });
 
     test('should handle missing API key gracefully', async () => {
       // Temporarily remove API key
       delete process.env.OPENAI_API_KEY;
 
-      const result = await validateSystem('tests/fixtures/test-minimal-flow.json');
+      const result = await validateSystem(
+        'tests/fixtures/test-minimal-flow.json',
+      );
       expect(result).toBe(false);
 
       // Restore API key
@@ -158,7 +167,10 @@ describe('CLI Direct Integration Tests', () => {
   describe('End-to-End Flow Integration', () => {
     test('should handle complete CLI workflow for minimal flow (validation only)', async () => {
       // 1. Parse arguments
-      const args = parseArgs(['--config=tests/fixtures/test-minimal-flow.json', '--verbose']);
+      const args = parseArgs([
+        '--config=tests/fixtures/test-minimal-flow.json',
+        '--verbose',
+      ]);
       expect(args.config).toBe('tests/fixtures/test-minimal-flow.json');
       expect(args.verbose).toBe(true);
 
@@ -173,7 +185,9 @@ describe('CLI Direct Integration Tests', () => {
 
     test('should handle complete CLI workflow for complex flow (validation only)', async () => {
       // 1. Parse arguments
-      const args = parseArgs(['--config=tests/fixtures/test-complex-flow.json']);
+      const args = parseArgs([
+        '--config=tests/fixtures/test-complex-flow.json',
+      ]);
       expect(args.config).toBe('tests/fixtures/test-complex-flow.json');
 
       // 2. Validate system (this is the main integration test)
@@ -186,8 +200,13 @@ describe('CLI Direct Integration Tests', () => {
 
     test('should integrate parseArgs with template files', () => {
       // Test that parseArgs works with both template paths
-      const minimalArgs = parseArgs(['--config=templates/example-minimal-flow.json', '--verbose']);
-      const complexArgs = parseArgs(['--config=templates/example-complex-flow.json']);
+      const minimalArgs = parseArgs([
+        '--config=templates/example-minimal-flow.json',
+        '--verbose',
+      ]);
+      const complexArgs = parseArgs([
+        '--config=templates/example-complex-flow.json',
+      ]);
 
       expect(minimalArgs.config).toBe('templates/example-minimal-flow.json');
       expect(minimalArgs.verbose).toBe(true);

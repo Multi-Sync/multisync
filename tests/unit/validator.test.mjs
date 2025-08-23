@@ -5,7 +5,7 @@ import {
   validateMCPServers,
   validateFileSystem,
   validateNetworkConnectivity,
-  validateSystem
+  validateSystem,
 } from '../../validator.mjs';
 
 describe('Validator Functions', () => {
@@ -28,17 +28,23 @@ describe('Validator Functions', () => {
 
     test('should fail with missing API key', () => {
       delete process.env.OPENAI_API_KEY;
-      expect(() => validateOpenAIKey()).toThrow('OPENAI_API_KEY not found in system environment');
+      expect(() => validateOpenAIKey()).toThrow(
+        'OPENAI_API_KEY not found in system environment',
+      );
     });
 
     test('should fail with empty API key', () => {
       process.env.OPENAI_API_KEY = '';
-      expect(() => validateOpenAIKey()).toThrow('OPENAI_API_KEY not found in system environment');
+      expect(() => validateOpenAIKey()).toThrow(
+        'OPENAI_API_KEY not found in system environment',
+      );
     });
 
     test('should fail with invalid API key format', () => {
       process.env.OPENAI_API_KEY = 'invalid-key-format';
-      expect(() => validateOpenAIKey()).toThrow('OPENAI_API_KEY format invalid (should start with sk-)');
+      expect(() => validateOpenAIKey()).toThrow(
+        'OPENAI_API_KEY format invalid (should start with sk-)',
+      );
     });
 
     test('should fail with whitespace-only API key', () => {
@@ -90,8 +96,8 @@ describe('Validator Functions', () => {
       const mcpConfig = {
         stdio: {
           type: 'stdio',
-          fullCommand: 'uvx'
-        }
+          fullCommand: 'uvx',
+        },
       };
 
       const result = await validateNetworkConnectivity(mcpConfig);

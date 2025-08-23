@@ -59,23 +59,28 @@ function validateMCPServers(mcpConfig) {
       }
 
       if (!commandExists(command)) {
-        errors.push(`MCP server "${id}": command "${command}" not found in system PATH`);
+        errors.push(
+          `MCP server "${id}": command "${command}" not found in system PATH`,
+        );
         continue;
       }
 
       // Check if uvx is available for MCP server packages
       if (command === 'uvx') {
         if (!commandExists('uvx')) {
-          errors.push(`MCP server "${id}": uvx command not found. Install with: curl -LsSf https://astral.sh/uv/install.sh | sh`);
+          errors.push(
+            `MCP server "${id}": uvx command not found. Install with: curl -LsSf https://astral.sh/uv/install.sh | sh`,
+          );
         } else {
           // Check if the specific MCP server package is available
           const args = cfg.args || [];
           if (args.length > 0) {
-            const packageName = args[0];
             try {
-              execSync(`uvx --help`, { stdio: 'ignore' });
+              execSync('uvx --help', { stdio: 'ignore' });
             } catch {
-              warnings.push(`MCP server "${id}": uvx command found but may not work properly`);
+              warnings.push(
+                `MCP server "${id}": uvx command found but may not work properly`,
+              );
             }
           }
         }
@@ -109,7 +114,9 @@ function validateNodeEnvironment() {
   const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
 
   if (majorVersion < 18) {
-    errors.push(`Node.js version ${nodeVersion} is too old. Required: 18.x or higher`);
+    errors.push(
+      `Node.js version ${nodeVersion} is too old. Required: 18.x or higher`,
+    );
   }
 
   // Note: In ES modules, built-in modules are always available
@@ -155,10 +162,12 @@ async function validateNetworkConnectivity(mcpConfig) {
       try {
         const response = await fetch(cfg.url, {
           method: 'HEAD',
-          signal: AbortSignal.timeout(5000) // 5 second timeout
+          signal: AbortSignal.timeout(5000), // 5 second timeout
         });
         if (!response.ok) {
-          warnings.push(`MCP server "${id}": HTTP ${response.status} - ${cfg.url}`);
+          warnings.push(
+            `MCP server "${id}": HTTP ${response.status} - ${cfg.url}`,
+          );
         }
       } catch (error) {
         warnings.push(`MCP server "${id}": Network error - ${error.message}`);
@@ -231,10 +240,11 @@ export async function validateSystem(configPath) {
 
     // 6. Validate network connectivity
     console.log('6️⃣ Checking network connectivity...');
-    const networkValidation = await validateNetworkConnectivity(config.mcpServers);
+    const networkValidation = await validateNetworkConnectivity(
+      config.mcpServers,
+    );
     allWarnings.push(...networkValidation.warnings);
     console.log('   ✅ Network connectivity check completed\n');
-
   } catch (error) {
     allErrors.push(`Validation failed: ${error.message}`);
   }
@@ -265,5 +275,5 @@ export {
   validateMCPServers,
   validateNodeEnvironment,
   validateFileSystem,
-  validateNetworkConnectivity
+  validateNetworkConnectivity,
 };

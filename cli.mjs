@@ -56,7 +56,7 @@ async function runInteractiveMode() {
   const readline = await import('node:readline/promises');
   const rl = readline.createInterface({
     input: process.stdin,
-    output: process.stdout
+    output: process.stdout,
   });
 
   console.log('🚀 Multisync Interactive Mode');
@@ -87,7 +87,6 @@ async function runInteractiveMode() {
 
       // Ask for next question (recursive call)
       askQuestion();
-
     } catch (error) {
       console.error(`❌ Error processing input: ${error.message}`);
       // Continue asking questions even if there's an error
@@ -129,7 +128,6 @@ async function main() {
 
     // Run parser with config
     await runParser(flags.config, flags.verbose);
-
   } catch (error) {
     console.error(`❌ Error: ${error.message}`);
     process.exit(1);

@@ -7,24 +7,36 @@ import { Agent, MCPServerStdio, run, withTrace } from '@openai/agents';
 import { z } from 'zod';
 import { validateSystem } from './validator.mjs';
 
-
 /* ------------------------------ Small helpers ------------------------------ */
 
 const warn = (...a) => console.warn('[warn]', ...a);
-const die = (msg, code = 1) => { console.error(msg); process.exit(code); };
+const die = (msg, code = 1) => {
+  console.error(msg);
+  process.exit(code);
+};
 
-function assert(cond, msg) { if (!cond) die(msg); }
+function assert(cond, msg) {
+  if (!cond) {
+    die(msg);
+  }
+}
 
 /** Minimal JSON-Schema → zod converter (covers common cases used here). */
 function jsonSchemaToZod(schema) {
-  if (!schema) return z.any();
+  if (!schema) {
+    return z.any();
+  }
 
   // Simple primitives
   if (schema.type === 'string') {
     return schema.enum ? z.enum(schema.enum) : z.string();
   }
-  if (schema.type === 'number' || schema.type === 'integer') return z.number();
-  if (schema.type === 'boolean') return z.boolean();
+  if (schema.type === 'number' || schema.type === 'integer') {
+    return z.number();
+  }
+  if (schema.type === 'boolean') {
+    return z.boolean();
+  }
 
   // Arrays
   if (schema.type === 'array') {
@@ -38,7 +50,9 @@ function jsonSchemaToZod(schema) {
     const req = new Set(schema.required || []);
     for (const [k, v] of Object.entries(schema.properties || {})) {
       let zf = jsonSchemaToZod(v);
-      if (!req.has(k)) zf = zf.optional();
+      if (!req.has(k)) {
+        zf = zf.optional();
+      }
       shape[k] = zf;
     }
     let obj = z.object(shape);
@@ -59,6 +73,7 @@ function evalExpr(expr, ctx) {
   // This is a local utility script; if you need hardened evaluation, swap this out.
   try {
     // Create a sandboxed function with only the ctx keys in scope.
+    // eslint-disable-next-line no-new-func
     const fn = new Function(...Object.keys(ctx), `return (${expr});`);
     return fn(...Object.values(ctx));
   } catch (e) {
@@ -79,7 +94,7 @@ const colors = {
   blue: '\x1b[34m',
   magenta: '\x1b[35m',
   cyan: '\x1b[36m',
-  white: '\x1b[37m'
+  white: '\x1b[37m',
 };
 
 // Color palette for agents
@@ -89,29 +104,37 @@ const agentColors = [
   colors.yellow,
   colors.green,
   colors.blue,
-  colors.red
+  colors.red,
 ];
 
-let verboseMode = false;
-let agentColorMap = new Map();
+const verboseMode = false;
+const agentColorMap = new Map();
 
 function log(agentId, message, type = 'info') {
-  if (!verboseMode) return;
+  if (!verboseMode) {
+    return;
+  }
 
   const color = agentColorMap.get(agentId) || colors.white;
   const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
   const prefix = type === 'error' ? '❌' : type === 'warn' ? '⚠️' : 'ℹ️';
 
-  console.log(`${color}[${timestamp}] ${agentId}${colors.reset} ${prefix} ${message}`);
+  console.log(
+    `${color}[${timestamp}] ${agentId}${colors.reset} ${prefix} ${message}`,
+  );
 }
 
 function logSystem(message, type = 'info') {
-  if (!verboseMode) return;
+  if (!verboseMode) {
+    return;
+  }
 
   const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
   const prefix = type === 'error' ? '❌' : type === 'warn' ? '⚠️' : 'ℹ️';
 
-  console.log(`${colors.bright}[${timestamp}] SYSTEM${colors.reset} ${prefix} ${message}`);
+  console.log(
+    `${colors.bright}[${timestamp}] SYSTEM${colors.reset} ${prefix} ${message}`,
+  );
 }
 
 /* ------------------------------ Configuration Validation ------------------------------ */
@@ -141,7 +164,9 @@ function validateConfig(config) {
       throw new Error(`Output schema "${name}" must have "result" property`);
     }
     if (!schema.required?.includes('result')) {
-      throw new Error(`Output schema "${name}" must have required "result" property`);
+      throw new Error(
+        `Output schema "${name}" must have required "result" property`,
+      );
     }
     logSystem(`✓ Schema "${name}" validated`);
   }
@@ -155,7 +180,9 @@ function validateConfig(config) {
       throw new Error(`Agent "${id}" must have "outputSchemaRef" property`);
     }
     if (!config.outputSchemas?.[agent.outputSchemaRef]) {
-      throw new Error(`Agent "${id}" references unknown output schema "${agent.outputSchemaRef}"`);
+      throw new Error(
+        `Agent "${id}" references unknown output schema "${agent.outputSchemaRef}"`,
+      );
     }
     logSystem(`✓ Agent "${id}" validated (schema: ${agent.outputSchemaRef})`);
   }
@@ -171,7 +198,9 @@ function standardizeOutput(output) {
   }
 
   if (typeof output === 'string') {
-    throw new Error('String outputs are not allowed, it should be a JSON object and must have "result" property');
+    throw new Error(
+      'String outputs are not allowed, it should be a JSON object and must have "result" property',
+    );
   }
 
   if (!output.result) {
@@ -192,18 +221,27 @@ async function buildMcpServers(mcpConfig) {
   for (const [id, cfg] of Object.entries(mcpConfig || {})) {
     const type = cfg.type?.toLowerCase();
     if (type === 'stdio') {
-      const full = [cfg.fullCommand, ...(cfg.args || [])].filter(Boolean).join(' ');
+      const full = [cfg.fullCommand, ...(cfg.args || [])]
+        .filter(Boolean)
+        .join(' ');
       logSystem(`Connecting to MCP stdio server: ${id} (${full})`);
 
       const srv = new MCPServerStdio({
         name: cfg.name || id,
-        fullCommand: full
+        fullCommand: full,
       });
       mcp[id] = srv;
-      connects.push(srv.connect().catch(err => {
-        logSystem(`Failed to connect MCP stdio server "${id}": ${err?.message || err}`, 'error');
-        die(`Failed to connect MCP stdio server "${id}": ${err?.message || err}`);
-      }));
+      connects.push(
+        srv.connect().catch(err => {
+          logSystem(
+            `Failed to connect MCP stdio server "${id}": ${err?.message || err}`,
+            'error',
+          );
+          die(
+            `Failed to connect MCP stdio server "${id}": ${err?.message || err}`,
+          );
+        }),
+      );
     } else if (type === 'http') {
       logSystem(`Connecting to MCP HTTP server: ${id} (${cfg.url})`);
       // Agents SDK accepts an MCP URL directly inside agent.mcpServers
@@ -240,20 +278,24 @@ function buildAgents(agentsConfig, mcpRegistry, outputSchemas) {
 
     const outputType = outputSchemas[a.outputSchemaRef];
     if (!outputType) {
-      throw new Error(`Agent "${id}" references unknown output schema "${a.outputSchemaRef}"`);
+      throw new Error(
+        `Agent "${id}" references unknown output schema "${a.outputSchemaRef}"`,
+      );
     }
 
     // Convert JSON schema to Zod if needed
     const zodSchema = jsonSchemaToZod(outputType);
 
-    const mcpRefs = (a.mcpServerRefs || []).map(ref => {
-      const srv = mcpRegistry[ref];
-      if (!srv) {
-        log(id, `References unknown MCP "${ref}"`, 'warn');
-        warn(`Agent "${id}" references unknown MCP "${ref}"`);
-      }
-      return srv;
-    }).filter(Boolean);
+    const mcpRefs = (a.mcpServerRefs || [])
+      .map(ref => {
+        const srv = mcpRegistry[ref];
+        if (!srv) {
+          log(id, `References unknown MCP "${ref}"`, 'warn');
+          warn(`Agent "${id}" references unknown MCP "${ref}"`);
+        }
+        return srv;
+      })
+      .filter(Boolean);
 
     log(id, `Creating base agent with ${mcpRefs.length} MCP servers`);
 
@@ -262,7 +304,7 @@ function buildAgents(agentsConfig, mcpRegistry, outputSchemas) {
       instructions: a.instructions || '',
       outputType: zodSchema, // Always use the schema
       modelSettings: a.modelSettings || {},
-      mcpServers: mcpRefs
+      mcpServers: mcpRefs,
     });
   }
 
@@ -272,7 +314,7 @@ function buildAgents(agentsConfig, mcpRegistry, outputSchemas) {
   for (const [id, a] of Object.entries(raw)) {
     // Build tools
     const tools = [];
-    for (const t of (a.tools || [])) {
+    for (const t of a.tools || []) {
       if (t.kind === 'agent') {
         const target = baseAgents[t.ref];
         if (!target) {
@@ -281,14 +323,18 @@ function buildAgents(agentsConfig, mcpRegistry, outputSchemas) {
           continue;
         }
         log(id, `Adding agent tool: ${t.id || t.ref}`);
-        tools.push(target.asTool({
-          toolName: t.id || t.ref,
-          toolDescription: t.description || `Tool for agent ${t.ref}`
-        }));
+        tools.push(
+          target.asTool({
+            toolName: t.id || t.ref,
+            toolDescription: t.description || `Tool for agent ${t.ref}`,
+          }),
+        );
       } else if (t.kind === 'function') {
         // If you want actual function tools, replace this with a real tool impl.
         log(id, `Function tool "${t.id}" declared but not implemented`, 'warn');
-        warn(`Agent "${id}" declares function tool "${t.id}". Stub only—no-op.`);
+        warn(
+          `Agent "${id}" declares function tool "${t.id}". Stub only—no-op.`,
+        );
         continue;
       } else {
         log(id, `Tool "${t.id}" has unknown kind "${t.kind}"`, 'warn');
@@ -298,13 +344,20 @@ function buildAgents(agentsConfig, mcpRegistry, outputSchemas) {
 
     const outputType = outputSchemas[a.outputSchemaRef];
     if (!outputType) {
-      throw new Error(`Agent "${id}" references unknown output schema "${a.outputSchemaRef}"`);
+      throw new Error(
+        `Agent "${id}" references unknown output schema "${a.outputSchemaRef}"`,
+      );
     }
 
     const zodSchema = jsonSchemaToZod(outputType);
-    const mcpRefs = (a.mcpServerRefs || []).map(ref => mcpRegistry[ref]).filter(Boolean);
+    const mcpRefs = (a.mcpServerRefs || [])
+      .map(ref => mcpRegistry[ref])
+      .filter(Boolean);
 
-    log(id, `Creating final agent with ${tools.length} tools and ${mcpRefs.length} MCP servers`);
+    log(
+      id,
+      `Creating final agent with ${tools.length} tools and ${mcpRefs.length} MCP servers`,
+    );
 
     finalAgents[id] = new Agent({
       name: a.name || id,
@@ -312,7 +365,7 @@ function buildAgents(agentsConfig, mcpRegistry, outputSchemas) {
       outputType: zodSchema, // Always use the schema
       modelSettings: a.modelSettings || {},
       mcpServers: mcpRefs,
-      tools
+      tools,
     });
   }
 
@@ -323,23 +376,39 @@ function buildAgents(agentsConfig, mcpRegistry, outputSchemas) {
 /* ------------------------------ Executors ---------------------------------- */
 
 async function execSingleAgent(agent, history, carryHistory = true) {
-  log(agent.name || 'unknown', `Running with ${history.length} history messages, carryHistory: ${carryHistory}`);
+  log(
+    agent.name || 'unknown',
+    `Running with ${history.length} history messages, carryHistory: ${carryHistory}`,
+  );
 
   const res = await run(agent, history);
   let nextHistory = history;
-  if (carryHistory) nextHistory = res.history || history;
+  if (carryHistory) {
+    nextHistory = res.history || history;
+  }
 
-  log(agent.name || 'unknown', `Completed, output: ${res.finalOutput ? 'present' : 'null'}, history: ${nextHistory.length} messages`);
+  log(
+    agent.name || 'unknown',
+    `Completed, output: ${res.finalOutput ? 'present' : 'null'}, history: ${nextHistory.length} messages`,
+  );
   return { finalOutput: res.finalOutput, history: nextHistory };
 }
 
-async function execAgentReviewer(proposalAgent, reviewerAgent, history, {
-  passCondition = "score == 'pass'",
-  maxTurns = 8,
-  feedbackInjection = 'as_user',
-  carryHistory = true
-}) {
-  log(proposalAgent.name || 'unknown', `Starting review loop (max ${maxTurns} turns, pass condition: ${passCondition})`);
+async function execAgentReviewer(
+  proposalAgent,
+  reviewerAgent,
+  history,
+  {
+    passCondition = 'score == \'pass\'',
+    maxTurns = 8,
+    feedbackInjection = 'as_user',
+    carryHistory = true,
+  },
+) {
+  log(
+    proposalAgent.name || 'unknown',
+    `Starting review loop (max ${maxTurns} turns, pass condition: ${passCondition})`,
+  );
 
   let turn = 0;
   let lastProposal = null;
@@ -347,44 +416,72 @@ async function execAgentReviewer(proposalAgent, reviewerAgent, history, {
 
   while (turn < maxTurns) {
     turn++;
-    log(proposalAgent.name || 'unknown', `Turn ${turn}/${maxTurns}: Generating proposal`);
+    log(
+      proposalAgent.name || 'unknown',
+      `Turn ${turn}/${maxTurns}: Generating proposal`,
+    );
 
     const prop = await run(proposalAgent, nextHistory);
     lastProposal = prop.finalOutput ?? null;
-    if (carryHistory) nextHistory = prop.history || nextHistory;
+    if (carryHistory) {
+      nextHistory = prop.history || nextHistory;
+    }
 
-    log(reviewerAgent.name || 'unknown', `Turn ${turn}/${maxTurns}: Reviewing proposal`);
+    log(
+      reviewerAgent.name || 'unknown',
+      `Turn ${turn}/${maxTurns}: Reviewing proposal`,
+    );
     const rev = await run(reviewerAgent, nextHistory);
     const review = rev.finalOutput || {};
-    if (carryHistory) nextHistory = rev.history || nextHistory;
+    if (carryHistory) {
+      nextHistory = rev.history || nextHistory;
+    }
 
     const ctx = { ...review, turn, maxTurns };
     const pass = evalExpr(passCondition, ctx);
 
-    log(reviewerAgent.name || 'unknown', `Turn ${turn}/${maxTurns}: Evaluation result - ${pass ? 'PASS' : 'FAIL'}`);
+    log(
+      reviewerAgent.name || 'unknown',
+      `Turn ${turn}/${maxTurns}: Evaluation result - ${pass ? 'PASS' : 'FAIL'}`,
+    );
 
     if (pass) {
-      log(proposalAgent.name || 'unknown', `Review loop completed successfully in ${turn} turns`);
+      log(
+        proposalAgent.name || 'unknown',
+        `Review loop completed successfully in ${turn} turns`,
+      );
       return { finalOutput: lastProposal, history: nextHistory, passed: true };
     }
 
     // Inject feedback for next iteration
     const fb = review?.feedback ?? JSON.stringify(review);
     if (feedbackInjection === 'as_system') {
-      nextHistory = [...nextHistory, { role: 'system', content: `Feedback: ${fb}` }];
+      nextHistory = [
+        ...nextHistory,
+        { role: 'system', content: `Feedback: ${fb}` },
+      ];
     } else if (feedbackInjection === 'append_only') {
       // no-op: iteration without message injection
     } else {
       // default 'as_user'
-      nextHistory = [...nextHistory, { role: 'user', content: `Feedback: ${fb}` }];
+      nextHistory = [
+        ...nextHistory,
+        { role: 'user', content: `Feedback: ${fb}` },
+      ];
     }
 
     if (turn < maxTurns) {
-      log(proposalAgent.name || 'unknown', `Turn ${turn}/${maxTurns}: Injecting feedback for next iteration`);
+      log(
+        proposalAgent.name || 'unknown',
+        `Turn ${turn}/${maxTurns}: Injecting feedback for next iteration`,
+      );
     }
   }
 
-  log(proposalAgent.name || 'unknown', `Review loop completed after ${maxTurns} turns without passing`);
+  log(
+    proposalAgent.name || 'unknown',
+    `Review loop completed after ${maxTurns} turns without passing`,
+  );
   return { finalOutput: lastProposal, history: nextHistory, passed: false };
 }
 
@@ -398,7 +495,11 @@ async function runFlow(config, userPrompt) {
 
   // Build infra
   const mcpRegistry = await buildMcpServers(config.mcpServers || {});
-  const agents = buildAgents(config.agents || {}, mcpRegistry, config.outputSchemas || {});
+  const agents = buildAgents(
+    config.agents || {},
+    mcpRegistry,
+    config.outputSchemas || {},
+  );
 
   // Seed history
   let history = [{ role: 'user', content: userPrompt }];
@@ -408,47 +509,53 @@ async function runFlow(config, userPrompt) {
 
   for (let i = 0; i < flow.steps.length; i++) {
     const step = flow.steps[i];
-    logSystem(`Executing step ${i + 1}/${flow.steps.length}: ${step.type} (${step.id})`);
+    logSystem(
+      `Executing step ${i + 1}/${flow.steps.length}: ${step.type} (${step.id})`,
+    );
 
     if (step.type === 'single_agent') {
       const agent = agents[step.agentRef];
       assert(agent, `Agent "${step.agentRef}" not found.`);
 
-      log(step.agentRef, `Starting execution`);
-      const { finalOutput: out, history: h } = await execSingleAgent(agent, history, step.io?.carryHistory !== false);
+      log(step.agentRef, 'Starting execution');
+      const { finalOutput: out, history: h } = await execSingleAgent(
+        agent,
+        history,
+        step.io?.carryHistory !== false,
+      );
       currentOutput = out;
       history = h;
-      log(step.agentRef, `Execution completed`);
-
+      log(step.agentRef, 'Execution completed');
     } else if (step.type === 'agent_reviewer') {
       const proposal = agents[step.proposalAgentRef];
       const reviewer = agents[step.reviewerAgentRef];
       assert(proposal, `Proposal agent "${step.proposalAgentRef}" not found.`);
       assert(reviewer, `Reviewer agent "${step.reviewerAgentRef}" not found.`);
 
-      log(step.proposalAgentRef, `Starting proposal generation`);
-      log(step.reviewerAgentRef, `Starting review process`);
+      log(step.proposalAgentRef, 'Starting proposal generation');
+      log(step.reviewerAgentRef, 'Starting review process');
 
-      const { finalOutput: out, history: h, passed } = await execAgentReviewer(
-        proposal,
-        reviewer,
-        history,
-        {
-          passCondition: step.passCondition || "score == 'pass'",
-          maxTurns: typeof step.maxTurns === 'number' ? step.maxTurns : 8,
-          feedbackInjection: step.feedbackInjection || 'as_user',
-          carryHistory: step.io?.carryHistory !== false
-        }
-      );
+      const {
+        finalOutput: out,
+        history: h,
+        passed,
+      } = await execAgentReviewer(proposal, reviewer, history, {
+        passCondition: step.passCondition || 'score == \'pass\'',
+        maxTurns: typeof step.maxTurns === 'number' ? step.maxTurns : 8,
+        feedbackInjection: step.feedbackInjection || 'as_user',
+        carryHistory: step.io?.carryHistory !== false,
+      });
       currentOutput = out;
       history = h;
 
-      log(step.proposalAgentRef, `Proposal completed`);
-      log(step.reviewerAgentRef, `Review completed - ${passed ? 'PASSED' : 'FAILED'}`);
+      log(step.proposalAgentRef, 'Proposal completed');
+      log(
+        step.reviewerAgentRef,
+        `Review completed - ${passed ? 'PASSED' : 'FAILED'}`,
+      );
 
       // Note: We continue to next step regardless of pass/fail
       // If you want to stop on failure, add logic here
-
     } else {
       die(`Unknown step type "${step.type}" at step ${i + 1}.`);
     }
@@ -457,9 +564,9 @@ async function runFlow(config, userPrompt) {
   // Standardize and return the final output
   if (currentOutput !== null && currentOutput !== undefined) {
     try {
-      logSystem(`Standardizing output...`);
+      logSystem('Standardizing output...');
       const standardized = standardizeOutput(currentOutput);
-      logSystem(`Output validation successful`);
+      logSystem('Output validation successful');
       console.log(JSON.stringify(standardized));
       return standardized;
     } catch (error) {
@@ -468,9 +575,9 @@ async function runFlow(config, userPrompt) {
     }
   } else {
     // No output from any step
-    logSystem(`No output generated, returning empty result`);
-    console.log(JSON.stringify({ result: "" }));
-    return { result: "" };
+    logSystem('No output generated, returning empty result');
+    console.log(JSON.stringify({ result: '' }));
+    return { result: '' };
   }
 }
 /* --------------------------------- Main ------------------------------------ */
@@ -503,7 +610,7 @@ export async function runParser(configPath, verbose = false) {
       });
 
       console.log('\n🎨 Agent Color Map:');
-      agentIds.forEach((agentId) => {
+      agentIds.forEach(agentId => {
         const color = agentColorMap.get(agentId);
         console.log(`${color}${agentId}${colors.reset}`);
       });
@@ -512,28 +619,36 @@ export async function runParser(configPath, verbose = false) {
 
     console.log('Configuration validated successfully');
     if (verbose) {
-      console.log('Verbose logging enabled - detailed execution logs will be shown');
+      console.log(
+        'Verbose logging enabled - detailed execution logs will be shown',
+      );
     }
     console.log('Type your prompt and press Enter. Type "exit" to quit.\n');
 
     // Set up readline interface
-    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout,
+    });
 
     try {
       while (true) {
         const userPrompt = (await rl.question('> ')).trim();
 
-        if (!userPrompt) continue;
+        if (!userPrompt) {
+          continue;
+        }
 
         const cmd = userPrompt.toLowerCase();
-        if (cmd === 'exit' || cmd === 'quit' || cmd === ':q') break;
+        if (cmd === 'exit' || cmd === 'quit' || cmd === ':q') {
+          break;
+        }
 
         await withTrace('Flow', async () => runFlow(config, userPrompt));
       }
     } finally {
       rl.close();
     }
-
   } catch (err) {
     die(err?.stack || err?.message || String(err));
   }
