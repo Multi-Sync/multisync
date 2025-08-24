@@ -12,7 +12,7 @@ Multisync is a powerful Node.js library that enables you to create complex, mult
 
 Create and manage your multi-agent workflows visually using our web-based dashboard:
 
-- **🖥️ Visual Workflow Builder**: Drag-and-drop interface for creating complex agent workflows
+- **🖥️ Workflow Visualizer**: A visualizer for the form-based workflow creation process
 - **📋 Template Library**: Pre-built workflow templates for common use cases
 - **🔧 Schema Editor**: Easy-to-use JSON Schema builder for agent outputs
 - **📤 Export**: Generate ready-to-use `agent-compose.json` files for the CLI
