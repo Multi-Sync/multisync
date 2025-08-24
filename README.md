@@ -229,8 +229,14 @@ Create a multi-language translation pipeline:
 
 > **💡 Tip**: Set your OpenAI API key as a system environment variable:
 >
+> **macOS / Linux (Bash)**
 > ```bash
 > export OPENAI_API_KEY="your-api-key-here"
+> ```
+>
+> **Windows (Command Prompt)**
+> ```bash
+> set OPENAI_API_KEY="your-api-key-here"
 > ```
 
 ## 📋 CLI Commands
