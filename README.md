@@ -242,6 +242,7 @@ Create a multi-language translation pipeline:
 | `multisync --config=file.json --verbose` | Run with verbose logging        |
 | `multisync --setup`                      | Run system setup and validation |
 | `multisync --help`                       | Show help information           |
+| `multisync -v, --version`                | Show version number             |
 
 ## 🛠️ Development
 

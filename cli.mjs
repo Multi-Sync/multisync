@@ -2,6 +2,9 @@
 // Main CLI entry point for multisync
 import { validateOpenAIKey, validateNodeEnvironment } from './validator.mjs';
 import { runParser } from './parser.mjs';
+import { readFileSync } from 'fs';
+import { resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 function showHelp() {
   console.log(`
@@ -12,6 +15,7 @@ Options:
   --config=PATH        Configuration file path (required for execution)
   --verbose            Enable verbose logging
   --help               Show this help message
+  -v, --version        Show the version number
 
 Examples:
   multisync              # Start interactive mode
@@ -21,12 +25,21 @@ Examples:
 `);
 }
 
+function showVersion() {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
+  const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'));
+  console.log(pkg.version);
+}
+
 export function parseArgs(args) {
   const flags = {};
 
   for (const arg of args) {
     if (arg === '--help') {
       flags.help = true;
+    } else if (arg === '--version' || arg === '-v') {
+      flags.version = true;
     } else if (arg === '--setup') {
       flags.setup = true;
     } else if (arg === '--verbose') {
@@ -112,6 +125,11 @@ async function main() {
 
     if (flags.help) {
       showHelp();
+      return;
+    }
+
+    if (flags.version) {
+      showVersion();
       return;
     }
 
