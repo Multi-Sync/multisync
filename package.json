@@ -31,10 +31,10 @@
   "scripts": {
     "setup": "node src/cli.mjs --setup",
     "start": "node src/cli.mjs",
-    "test": "node --experimental-vm-modules ./node_modules/.bin/jest --forceExit --detectOpenHandles",
-    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch --forceExit",
-    "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage --forceExit --detectOpenHandles",
-    "test:ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --coverage --watchAll=false --forceExit --detectOpenHandles",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --detectOpenHandles",
+    "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch --forceExit",
+    "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --forceExit --detectOpenHandles",
+    "test:ci": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --ci --coverage --watchAll=false --forceExit --detectOpenHandles",
     "lint": "eslint *.mjs tests/**/*.mjs",
     "lint:fix": "eslint *.mjs tests/**/*.mjs --fix",
     "format": "prettier --write *.mjs tests/**/*.mjs",
@@ -44,7 +44,8 @@
   },
   "dependencies": {
     "@openai/agents": "^0.0.17",
-    "zod": "^3.25.76"
+    "zod": "^3.25.76",
+    "openai": "^4.56.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
