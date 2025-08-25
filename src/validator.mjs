@@ -65,14 +65,13 @@ function validateMCPServers(mcpConfig) {
         continue;
       }
 
-      // Check if uvx is available for MCP server packages
+      // Check uvx
       if (command === 'uvx') {
         if (!commandExists('uvx')) {
           errors.push(
             `MCP server "${id}": uvx command not found. Install with: curl -LsSf https://astral.sh/uv/install.sh | sh`,
           );
         } else {
-          // Check if the specific MCP server package is available
           const args = cfg.args || [];
           if (args.length > 0) {
             try {
@@ -109,7 +108,6 @@ function validateNodeEnvironment() {
   const errors = [];
   const warnings = [];
 
-  // Check Node.js version
   const nodeVersion = process.version;
   const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
 
@@ -118,9 +116,6 @@ function validateNodeEnvironment() {
       `Node.js version ${nodeVersion} is too old. Required: 18.x or higher`,
     );
   }
-
-  // Note: In ES modules, built-in modules are always available
-  // No need to check for fs, path, child_process, url as they're built-in
 
   return { errors, warnings };
 }
@@ -133,13 +128,11 @@ function validateFileSystem(configPath) {
   const warnings = [];
 
   try {
-    // Check if config file exists and is readable
     accessSync(configPath, constants.R_OK);
   } catch {
     errors.push(`Configuration file not readable: ${configPath}`);
   }
 
-  // Check working directory permissions
   try {
     accessSync(process.cwd(), constants.W_OK);
   } catch {
@@ -156,13 +149,12 @@ async function validateNetworkConnectivity(mcpConfig) {
   const errors = [];
   const warnings = [];
 
-  // This is a basic check - in production you might want more sophisticated network testing
   for (const [id, cfg] of Object.entries(mcpConfig || {})) {
     if (cfg.type === 'http') {
       try {
         const response = await fetch(cfg.url, {
           method: 'HEAD',
-          signal: AbortSignal.timeout(5000), // 5 second timeout
+          signal: AbortSignal.timeout(5000),
         });
         if (!response.ok) {
           warnings.push(
@@ -201,23 +193,11 @@ export async function validateSystem(configPath) {
     allErrors.push(...nodeValidation.errors);
     allWarnings.push(...nodeValidation.warnings);
 
-    if (nodeValidation.errors.length === 0) {
-      console.log('   ✅ Node.js environment valid\n');
-    } else {
-      console.log('   ❌ Node.js environment issues found\n');
-    }
-
     // 3. Validate file system
     console.log('3️⃣ Checking file system...');
     const fsValidation = validateFileSystem(configPath);
     allErrors.push(...fsValidation.errors);
     allWarnings.push(...fsValidation.warnings);
-
-    if (fsValidation.errors.length === 0) {
-      console.log('   ✅ File system access valid\n');
-    } else {
-      console.log('   ❌ File system access issues found\n');
-    }
 
     // 4. Load and validate configuration
     console.log('4️⃣ Loading configuration...');
@@ -232,34 +212,23 @@ export async function validateSystem(configPath) {
     allErrors.push(...mcpValidation.errors);
     allWarnings.push(...mcpValidation.warnings);
 
-    if (mcpValidation.errors.length === 0) {
-      console.log('   ✅ MCP server dependencies valid\n');
-    } else {
-      console.log('   ❌ MCP server dependency issues found\n');
-    }
-
     // 6. Validate network connectivity
     console.log('6️⃣ Checking network connectivity...');
-    const networkValidation = await validateNetworkConnectivity(
-      config.mcpServers,
-    );
+    const networkValidation = await validateNetworkConnectivity(config.mcpServers);
     allWarnings.push(...networkValidation.warnings);
-    console.log('   ✅ Network connectivity check completed\n');
   } catch (error) {
     allErrors.push(`Validation failed: ${error.message}`);
   }
 
-  // Report results
   console.log('\n📊 Validation Results:');
-
   if (allWarnings.length > 0) {
     console.log('\n⚠️  Warnings:');
-    allWarnings.forEach(warning => console.log(`   • ${warning}`));
+    allWarnings.forEach(w => console.log(`   • ${w}`));
   }
 
   if (allErrors.length > 0) {
     console.log('\n❌ Errors:');
-    allErrors.forEach(error => console.log(`   • ${error}`));
+    allErrors.forEach(e => console.log(`   • ${e}`));
     console.log('\n💡 Please fix the above errors before running the parser.');
     return false;
   }
@@ -269,7 +238,6 @@ export async function validateSystem(configPath) {
 }
 
 /* ------------------------------ Individual Export Functions ------------------------------ */
-
 export {
   validateOpenAIKey,
   validateMCPServers,

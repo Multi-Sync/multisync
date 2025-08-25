@@ -44,14 +44,14 @@ global.setInterval = (fn, delay, ...args) => {
 
 // Override clearTimeout to remove from tracking
 const originalClearTimeout = global.clearTimeout;
-global.clearTimeout = (id) => {
+global.clearTimeout = id => {
   activeTimers.delete(id);
   return originalClearTimeout(id);
 };
 
 // Override clearInterval to remove from tracking
 const originalClearInterval = global.clearInterval;
-global.clearInterval = (id) => {
+global.clearInterval = id => {
   activeIntervals.delete(id);
   return originalClearInterval(id);
 };

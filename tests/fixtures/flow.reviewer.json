@@ -1,0 +1,47 @@
+{
+  "outputSchemas": {
+    "basic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result"],
+      "properties": {
+        "result": { "type": "string" }
+      }
+    },
+    "review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["result", "score"],
+      "properties": {
+        "result": { "type": "string" },
+        "score": { "type": "string", "enum": ["pass", "fail"] },
+        "feedback": { "type": "string" }
+      }
+    }
+  },
+  "agents": {
+    "proposer": {
+      "outputSchemaRef": "basic",
+      "instructions": "Propose an answer.",
+      "modelSettings": {}
+    },
+    "reviewer": {
+      "outputSchemaRef": "review",
+      "instructions": "Review the answer and score pass/fail.",
+      "modelSettings": {}
+    }
+  },
+  "flow": {
+    "steps": [
+      {
+        "id": "r1",
+        "type": "agent_reviewer",
+        "proposalAgentRef": "proposer",
+        "reviewerAgentRef": "reviewer",
+        "passCondition": "score == 'pass'",
+        "maxTurns": 3,
+        "feedbackInjection": "as_user"
+      }
+    ]
+  }
+}

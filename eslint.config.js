@@ -1,11 +1,12 @@
-const js = require('@eslint/js');
-const globals = require('globals');
+// eslint.config.js (Flat config, ESM)
+import js from '@eslint/js';
+import globals from 'globals';
 
-module.exports = [
+export default [
   js.configs.recommended,
   {
     languageOptions: {
-      ecmaVersion: 2022,
+      ecmaVersion: 'latest',
       sourceType: 'module',
       globals: {
         ...globals.node,
@@ -15,7 +16,7 @@ module.exports = [
     rules: {
       // Error prevention
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
-      'no-console': 'off', // Allow console.log for CLI tool
+      'no-console': 'off',
       'no-debugger': 'error',
 
       // Code quality
@@ -30,30 +31,30 @@ module.exports = [
       'prefer-arrow-callback': 'error',
 
       // Best practices
-      'eqeqeq': ['error', 'always'],
-      'curly': ['error', 'all'],
+      eqeqeq: ['error', 'always'],
+      curly: ['error', 'all'],
       'no-eval': 'error',
       'no-implied-eval': 'error',
       'no-new-func': 'error',
 
       // Formatting
-      'indent': ['error', 2],
-      'quotes': ['error', 'single'],
-      'semi': ['error', 'always'],
+      indent: ['error', 2],
+      quotes: ['error', 'single'],
+      semi: ['error', 'always'],
       'comma-dangle': ['error', 'always-multiline'],
       'no-trailing-spaces': 'error',
       'eol-last': 'error',
     },
   },
   {
-    files: ['tests/**/*.mjs', 'tests/**/*.js'],
+    files: ['tests/**/*.{js,mjs}'],
     languageOptions: {
       globals: {
         ...globals.jest,
       },
     },
     rules: {
-      'no-console': 'off', // Allow console in tests
+      'no-console': 'off',
     },
   },
 ];
