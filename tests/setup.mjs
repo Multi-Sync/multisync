@@ -14,7 +14,7 @@ global.fetch = jest.fn(() =>
     ok: true,
     status: 200,
     json: () => Promise.resolve({}),
-  })
+  }),
 );
 
 // Mock AbortSignal
