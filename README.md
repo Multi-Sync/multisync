@@ -103,6 +103,103 @@ Example output:
 }
 ```
 
+## 🔑 Prerequisites
+
+- **Node.js 18+**: Required for ES modules and modern JavaScript features
+- **OpenAI API Key**: Set as `OPENAI_API_KEY` system environment variable
+- **MCP Servers**: If using MCP integration (optional)
+
+> **💡 Tip**: Set your OpenAI API key as a system environment variable:
+>
+> ```bash
+> export OPENAI_API_KEY="your-api-key-here"
+> ```
+
+## 📋 CLI Commands
+
+| Command                                  | Description                     |
+| ---------------------------------------- | ------------------------------- |
+| `multisync`                              | Start interactive mode          |
+| `multisync --config=file.json`           | Run with configuration file     |
+| `multisync --config=file.json --verbose` | Run with verbose logging        |
+| `multisync --setup`                      | Run system setup and validation |
+| `multisync --help`                       | Show help information           |
+
+## 🛠️ Development
+
+### Local Development
+
+```bash
+# Clone the repository
+git clone https://github.com/Multi-Sync/multisync.git
+cd multisync
+
+# Install dependencies
+npm install
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Start development mode
+npm run dev
+```
+
+### Project Structure
+
+```
+multisync/
+├── cli.mjs          # Command-line interface
+├── parser.mjs       # Core workflow execution engine
+├── validator.mjs    # System validation and checks
+├── templates/       # Example configuration files
+├── tests/          # Test suite
+└── package.json    # Project configuration
+```
+
+## 🧪 Testing
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run specific test file
+npm test -- tests/unit/validator.test.mjs
+```
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md) for details.
+
+**🎯 Join our community at [multisync.io](https://multisync.io) to see our full vision and roadmap!**
+
+## 🚀 Coming Soon
+
+- **🦙 Ollama Integration**: Run workflows with local AI models for offline and privacy-focused use cases
+- **🌐 Multi-Provider Support**: Support for Anthropic, Google, and other AI providers
+- **📊 Workflow Analytics**: Monitor and optimize your agent workflows
+- **🔐 Enterprise Features**: Role-based access control and team collaboration
+- **📱 Mobile App**: iOS and Android apps for workflow management
+
+Stay updated at [multisync.io](https://multisync.io)!
+
+### Development Setup
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass
+6. Submit a pull request
+
 ## 📄 License
 
 Apache 2.0 © Multisync Inc.
