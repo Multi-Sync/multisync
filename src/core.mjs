@@ -14,6 +14,41 @@ export function ensureOpenAIKey(explicitKey) {
   return key;
 }
 
+/* -------- Color validation -------- */
+export function validateColor(color) {
+  if (!color) { return null; }
+  if (typeof color !== 'string') { return null; }
+
+  // Simple color validation - hex, named colors, rgb, hsl
+  const colorRegex = /^(#[0-9A-Fa-f]{3,6}|red|green|blue|yellow|purple|orange|pink|brown|gray|grey|black|white|cyan|magenta|lime|navy|maroon|olive|teal|silver|gold|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)|hsl\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*\))$/;
+
+  if (!colorRegex.test(color)) { return null; }
+
+  // Additional validation for RGB values
+  if (color.startsWith('rgb(')) {
+    const rgbMatch = color.match(/rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/);
+    if (rgbMatch) {
+      const [, r, g, b] = rgbMatch;
+      if (parseInt(r) > 255 || parseInt(g) > 255 || parseInt(b) > 255) {
+        return null;
+      }
+    }
+  }
+
+  // Additional validation for HSL values
+  if (color.startsWith('hsl(')) {
+    const hslMatch = color.match(/hsl\(\s*(\d+)\s*,\s*(\d+)%\s*,\s*(\d+)%\s*\)/);
+    if (hslMatch) {
+      const [, h, s, l] = hslMatch;
+      if (parseInt(h) > 360 || parseInt(s) > 100 || parseInt(l) > 100) {
+        return null;
+      }
+    }
+  }
+
+  return color;
+}
+
 /* -------- JSON Schema → Zod -------- */
 function jsonSchemaToZod(schema) {
   if (!schema) { return z.any(); }
@@ -50,6 +85,10 @@ export function validateConfig(config) {
     if (!config.outputSchemas?.[agent.outputSchemaRef]) {
       throw new Error(`Agent "${id}" references unknown schema "${agent.outputSchemaRef}"`);
     }
+    // Validate color if provided
+    if (agent.color && !validateColor(agent.color)) {
+      throw new Error(`Agent "${id}" has invalid color: "${agent.color}"`);
+    }
   }
 }
 
@@ -77,13 +116,20 @@ export function buildAgents(agentsConfig, mcpRegistry, outputSchemas) {
   for (const [id, a] of Object.entries(agentsConfig || {})) {
     const zodSchema = jsonSchemaToZod(outputSchemas[a.outputSchemaRef]);
     const mcpRefs = (a.mcpServerRefs || []).map(ref => mcpRegistry[ref]).filter(Boolean);
-    base[id] = new Agent({
+    const agent = new Agent({
       name: a.name || id,
       instructions: a.instructions || '',
       outputType: zodSchema,
       modelSettings: a.modelSettings || {},
       mcpServers: mcpRefs,
     });
+
+    // Add color metadata to agent
+    if (a.color) {
+      agent.color = validateColor(a.color);
+    }
+
+    base[id] = agent;
   }
   const finalAgents = {};
   for (const [id, a] of Object.entries(agentsConfig || {})) {
@@ -100,7 +146,7 @@ export function buildAgents(agentsConfig, mcpRegistry, outputSchemas) {
     }
     const zodSchema = jsonSchemaToZod(outputSchemas[a.outputSchemaRef]);
     const mcpRefs = (a.mcpServerRefs || []).map(ref => mcpRegistry[ref]).filter(Boolean);
-    finalAgents[id] = new Agent({
+    const agent = new Agent({
       name: a.name || id,
       instructions: a.instructions || '',
       outputType: zodSchema,
@@ -108,6 +154,13 @@ export function buildAgents(agentsConfig, mcpRegistry, outputSchemas) {
       mcpServers: mcpRefs,
       tools,
     });
+
+    // Add color metadata to final agent
+    if (a.color) {
+      agent.color = validateColor(a.color);
+    }
+
+    finalAgents[id] = agent;
   }
   return finalAgents;
 }

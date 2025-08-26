@@ -7,8 +7,14 @@
         "result": {
           "type": "object",
           "properties": {
-            "originalQuery": { "type": "string", "description": "The original user question" },
-            "arabicQuery": { "type": "string", "description": "The question translated to Arabic" }
+            "originalQuery": {
+              "type": "string",
+              "description": "The original user question"
+            },
+            "arabicQuery": {
+              "type": "string",
+              "description": "The question translated to Arabic"
+            }
           },
           "required": ["originalQuery", "arabicQuery"]
         }
@@ -21,9 +27,18 @@
         "result": {
           "type": "object",
           "properties": {
-            "originalQuery": { "type": "string", "description": "The original user question" },
-            "arabicQuery": { "type": "string", "description": "The question translated to Arabic" },
-            "frenchQuery": { "type": "string", "description": "The question translated to French" }
+            "originalQuery": {
+              "type": "string",
+              "description": "The original user question"
+            },
+            "arabicQuery": {
+              "type": "string",
+              "description": "The question translated to Arabic"
+            },
+            "frenchQuery": {
+              "type": "string",
+              "description": "The question translated to French"
+            }
           },
           "required": ["originalQuery", "arabicQuery", "frenchQuery"]
         }
@@ -36,12 +51,29 @@
         "result": {
           "type": "object",
           "properties": {
-            "originalQuery": { "type": "string", "description": "The original user question" },
-            "arabicQuery": { "type": "string", "description": "The question translated to Arabic" },
-            "frenchQuery": { "type": "string", "description": "The question translated to French" },
-            "englishQuery": { "type": "string", "description": "The question translated to English" }
+            "originalQuery": {
+              "type": "string",
+              "description": "The original user question"
+            },
+            "arabicQuery": {
+              "type": "string",
+              "description": "The question translated to Arabic"
+            },
+            "frenchQuery": {
+              "type": "string",
+              "description": "The question translated to French"
+            },
+            "englishQuery": {
+              "type": "string",
+              "description": "The question translated to English"
+            }
           },
-          "required": ["originalQuery", "arabicQuery", "frenchQuery", "englishQuery"]
+          "required": [
+            "originalQuery",
+            "arabicQuery",
+            "frenchQuery",
+            "englishQuery"
+          ]
         }
       },
       "required": ["result"]
@@ -52,13 +84,35 @@
         "result": {
           "type": "object",
           "properties": {
-            "originalQuery": { "type": "string", "description": "The original user question" },
-            "arabicQuery": { "type": "string", "description": "The question translated to Arabic" },
-            "frenchQuery": { "type": "string", "description": "The question translated to French" },
-            "englishQuery": { "type": "string", "description": "The question translated to English" },
-            "final": { "type": "string", "enum": ["true"], "description": "Indicates this is the final output" }
+            "originalQuery": {
+              "type": "string",
+              "description": "The original user question"
+            },
+            "arabicQuery": {
+              "type": "string",
+              "description": "The question translated to Arabic"
+            },
+            "frenchQuery": {
+              "type": "string",
+              "description": "The question translated to French"
+            },
+            "englishQuery": {
+              "type": "string",
+              "description": "The question translated to English"
+            },
+            "final": {
+              "type": "string",
+              "enum": ["true"],
+              "description": "Indicates this is the final output"
+            }
           },
-          "required": ["originalQuery", "arabicQuery", "frenchQuery", "englishQuery", "final"]
+          "required": [
+            "originalQuery",
+            "arabicQuery",
+            "frenchQuery",
+            "englishQuery",
+            "final"
+          ]
         }
       },
       "required": ["result"]
@@ -68,6 +122,7 @@
   "agents": {
     "arabic_translator": {
       "name": "Arabic Translator",
+      "color": "#8B4513",
       "instructions": "You are an expert Arabic translator. Take the user's question and translate it to Arabic. Always return your response in the result property with originalQuery (the user's input) and arabicQuery (your Arabic translation). Ensure the Arabic translation is accurate and natural.",
       "outputSchemaRef": "ArabicTranslation",
       "modelSettings": { "store": false, "temperature": 0.3 },
@@ -84,6 +139,7 @@
     },
     "french_translator": {
       "name": "French Translator",
+      "color": "#4169E1",
       "instructions": "You are an expert French translator. Take the user's question and translate it to French. You will receive the original query and Arabic translation. Always return your response in the result property with originalQuery, arabicQuery, and frenchQuery (your French translation). Ensure the French translation is accurate and natural.",
       "outputSchemaRef": "FrenchTranslation",
       "modelSettings": { "store": false, "temperature": 0.3 },
