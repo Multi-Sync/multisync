@@ -1,4 +1,4 @@
-name: 📦 Publish to NPM
+name: 📦 Publish to registries
 
 on:
   push:
@@ -6,37 +6,67 @@ on:
 
 jobs:
   publish:
-    name: 📤 Publish Package
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write
 
     steps:
-      - name: 📥 Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js
+      - name: 🟢 Setup Node.js (npmjs)
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
           cache: 'npm'
 
-      - name: 📦 Install dependencies
+      - name: 📦 Install deps
         run: npm ci
 
-      - name: 🔍 Run quality checks
+      - name: 🔍 Quality checks
         run: |
           npm run lint
           npm run format:check
           npm run test:ci
 
-      - name: 📤 Publish to NPM
-        run: npm publish
+      # --- Publish to npmjs (unscoped) ---
+      - name: 📤 Publish to npm
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: 🎉 Publish success
+      # --- Prepare scoped manifest for GH Packages ---
+      - name: 🔧 Prepare scoped manifest
         run: |
-          echo "✅ Successfully published multisync@$(node -p "require('./package.json').version") to NPM"
-          echo "📦 Package: https://www.npmjs.com/package/multisync"
+          OWNER=${{ github.repository_owner }}
+          npm pkg set "name=@${OWNER}/multisync"
+          npm pkg set "publishConfig.registry=https://npm.pkg.github.com"
+
+      # --- Switch npm to GitHub Packages + auth ---
+      - name: 🟣 Setup Node.js (GitHub Packages)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@${{ github.repository_owner }}'
+          always-auth: true
+
+      - name: 🔐 Auth to GitHub Packages
+        run: |
+          echo "@${{ github.repository_owner }}:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
+
+      # --- Publish to GitHub Packages (scoped) ---
+      - name: 📤 Publish to GitHub Packages
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: 🎉 Done
+        run: |
+          echo "✅ npm: multisync@$(node -p "require('./package.json').version")"
+          echo "🌐 https://www.npmjs.com/package/multisync"
+          echo "✅ GH Packages: @${{ github.repository_owner }}/multisync"
+          echo "🌐 https://github.com/${{ github.repository }}/pkgs/npm/multisync"
+          
