@@ -1,3 +1,4 @@
+// cli.help.test.js
 import { jest } from '@jest/globals';
 
 const cli = await import('../src/cli.mjs');
