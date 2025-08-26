@@ -24,9 +24,18 @@
     "url": "https://github.com/Multi-Sync/multisync/issues"
   },
   "homepage": "https://github.com/Multi-Sync/multisync#readme",
-  "main": "src/cli.mjs",
+  "main": "src/index.mjs",
+  "module": "src/index.mjs",
   "bin": {
     "multisync": "./src/cli.mjs"
+  },
+  "exports": {
+    ".": {
+      "import": "./src/index.mjs"
+    },
+    "./core": {
+      "import": "./src/core.mjs"
+    }
   },
   "scripts": {
     "setup": "node src/cli.mjs --setup",
