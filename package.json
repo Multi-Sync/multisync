@@ -34,7 +34,7 @@
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest --forceExit --detectOpenHandles",
     "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch --forceExit",
     "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage --forceExit --detectOpenHandles",
-    "test:ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --coverage --watchAll=false --forceExit --detectOpenHandles",
+    "test:ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --coverage --runInBand --testTimeout=30000",
     "lint": "eslint *.mjs tests/**/*.mjs",
     "lint:fix": "eslint *.mjs tests/**/*.mjs --fix",
     "format": "prettier --write *.mjs tests/**/*.mjs",
