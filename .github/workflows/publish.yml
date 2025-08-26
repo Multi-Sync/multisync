@@ -6,17 +6,15 @@ on:
 
 jobs:
   publish:
-    name: 📤 Publish package (npm + GitHub Packages)
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
 
     steps:
-      - name: 📥 Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: 🟢 Setup Node.js
+      - name: 🟢 Setup Node.js (npmjs)
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
@@ -32,29 +30,43 @@ jobs:
           npm run format:check
           npm run test:ci
 
-      # --- Publish to npm (unscoped) ---
+      # --- Publish to npmjs (unscoped) ---
       - name: 📤 Publish to npm
         run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # --- Publish to GitHub Packages (scoped @OWNER/multisync) ---
-      - name: 🔧 Prepare scoped manifest for GH Packages
+      # --- Prepare scoped manifest for GH Packages ---
+      - name: 🔧 Prepare scoped manifest
         run: |
           OWNER=${{ github.repository_owner }}
           npm pkg set "name=@${OWNER}/multisync"
           npm pkg set "publishConfig.registry=https://npm.pkg.github.com"
 
+      # --- Switch npm to GitHub Packages + auth ---
+      - name: 🟣 Setup Node.js (GitHub Packages)
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://npm.pkg.github.com'
+          scope: '@${{ github.repository_owner }}'
+          always-auth: true
+
       - name: 🔐 Auth to GitHub Packages
         run: |
-          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+          echo "@${{ github.repository_owner }}:registry=https://npm.pkg.github.com" >> ~/.npmrc
+          echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ~/.npmrc
 
+      # --- Publish to GitHub Packages (scoped) ---
       - name: 📤 Publish to GitHub Packages
-        run: npm publish --access public
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🎉 Done
         run: |
-          echo "✅ Published npm: multisync@$(node -p "require('./package.json').version")"
+          echo "✅ npm: multisync@$(node -p "require('./package.json').version")"
           echo "🌐 https://www.npmjs.com/package/multisync"
-          echo "✅ Published GH Packages: @${{ github.repository_owner }}/multisync"
+          echo "✅ GH Packages: @${{ github.repository_owner }}/multisync"
           echo "🌐 https://github.com/${{ github.repository }}/pkgs/npm/multisync"
+          
