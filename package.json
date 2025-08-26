@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "multisync",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Multi-agent workflow orchestrator for AI-powered task automation",
   "keywords": [
     "ai",
