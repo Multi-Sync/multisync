@@ -44,8 +44,9 @@
   },
   "dependencies": {
     "@openai/agents": "^0.0.17",
-    "zod": "^3.25.76",
-    "openai": "^4.56.0"
+    "mime-types": "^2.1.35",
+    "openai": "^4.56.0",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",

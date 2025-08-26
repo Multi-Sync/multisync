@@ -3,6 +3,7 @@ import { Agent, MCPServerStdio, run } from '@openai/agents';
 import fs from 'fs';
 import { OpenAI } from 'openai';
 import { z } from 'zod';
+import mime from 'mime-types';
 
 /* -------- API key enforcement -------- */
 export function ensureOpenAIKey(explicitKey) {
@@ -161,8 +162,8 @@ async function execSingleAgent(agent, history, carryHistory = true) {
 }
 
 function evalExpr(expr, ctx) {
-  // eslint-disable-next-line no-new-func
   try {
+    // eslint-disable-next-line no-new-func
     const fn = new Function(...Object.keys(ctx), `return (${expr});`);
     return fn(...Object.values(ctx));
   } catch {
@@ -406,9 +407,9 @@ export async function runFlowWithFileBuffer(
   let file;
   try {
     // Create a File object from buffer
-    const fileObj = new File([fileBuffer], fileName, {
-      type: opts.mimeType || 'application/pdf',
-    });
+    const mimeType =
+      opts.mimeType ?? (mime.lookup(fileName) || 'application/octet-stream');
+    const fileObj = new File([fileBuffer], fileName, { type: mimeType });
 
     file = await client.files.create({
       file: fileObj,
