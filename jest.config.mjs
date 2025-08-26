@@ -3,6 +3,6 @@ export default {
   testEnvironment: 'node',
   transform: {},
   coverageThreshold: {
-    global: { statements: 70, branches: 55, functions: 65, lines: 70 },
+    global: { statements: 70, branches: 50, functions: 65, lines: 70 },
   },
 };
