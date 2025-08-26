@@ -170,7 +170,7 @@ export async function runFlow(config, userPrompt, opts = {}) {
       if (step.type === 'single_agent') {
         console.log(`📋 Step ${stepNum}/${config.flow.steps.length}: ${step.type} (agent: "${step.agentRef ?? "(none)"}")`);
       } else if (step.type === 'agent_reviewer') {
-        console.log(`📋 Step ${stepNum}/${config.flow.steps.length}: ${step.type} (proposal: "${step.proposalAgentRef}", reviewer: "${step.reviewerAgentRef}")`);
+        console.log(`📋 Step ${stepNum}/${config.flow.steps.length}: ${step.type} (proposal: "${step.proposalAgentRef ?? '(unknown)'}", reviewer: "${step.reviewerAgentRef ?? '(unknown)'})"`);
       }
     }
 
