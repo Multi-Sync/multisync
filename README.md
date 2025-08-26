@@ -1,6 +1,8 @@
 # Multisync 🔄
 
 [![npm version](https://img.shields.io/npm/v/multisync.svg?logo=npm&color=cb3837)](https://www.npmjs.com/package/multisync)
+[![CI](https://github.com/Multi-Sync/multisync/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Multi-Sync/multisync/actions/workflows/ci.yml)
+[![Release Status](https://github.com/Multi-Sync/multisync/workflows/🚀%20Release/badge.svg)](https://github.com/Multi-Sync/multisync/actions)
 
 > **Multi-agent workflow orchestrator for AI-powered automation**  
 > Compose, validate, and run AI agent workflows in Node.js & via CLI.

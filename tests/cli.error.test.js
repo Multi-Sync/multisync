@@ -1,3 +1,5 @@
+// cli.error.test.js
+
 const { parseArgs } = await import('../src/cli.mjs');
 
 describe('cli unknown args', () => {

@@ -111,9 +111,9 @@ function validateNodeEnvironment() {
   const nodeVersion = process.version;
   const majorVersion = parseInt(nodeVersion.slice(1).split('.')[0]);
 
-  if (majorVersion < 18) {
+  if (majorVersion < 20) {
     errors.push(
-      `Node.js version ${nodeVersion} is too old. Required: 18.x or higher`,
+      `Node.js version ${nodeVersion} is too old. Required: 20.x or higher`,
     );
   }
 
