@@ -2,11 +2,11 @@
 import { runFlow, validateConfig } from '../src/core.mjs';
 import { promises as fs } from 'fs';
 
-async function runAgents({ configPath, prompt, apiKey }) {
+async function runAgents({ configPath, prompt, apiKey, verbose = false }) {
   const raw = await fs.readFile(configPath, 'utf8');
   const config = JSON.parse(raw);
   validateConfig(config);
-  const result = await runFlow(config, prompt, { apiKey });
+  const result = await runFlow(config, prompt, { apiKey, verbose });
   return result;
 }
 
@@ -16,6 +16,11 @@ async function runAgents({ configPath, prompt, apiKey }) {
     configPath: './examples/dry-run.json',
     prompt: 'Hello, world!',
     apiKey: process.env.OPENAI_API_KEY,
+    verbose: true, // Enable verbose logging
   });
   console.log(out);
 })();
+
+// To disable verbose logging, either omit the verbose option or set it to false:
+// const out = await runAgents({ configPath: './examples/dry-run.json', prompt: 'Hello, world!', apiKey: process.env.OPENAI_API_KEY });
+// const out = await runAgents({ configPath: './examples/dry-run.json', prompt: 'Hello, world!', apiKey: process.env.OPENAI_API_KEY, verbose: false });
