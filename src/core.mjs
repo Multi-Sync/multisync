@@ -1,9 +1,9 @@
 // core.mjs
 import { Agent, MCPServerStdio, run } from '@openai/agents';
 import fs from 'fs';
-import { OpenAI } from 'openai';
 import { z } from 'zod';
-import mime from 'mime-types';
+import { guessMimeType } from '../utils/mime.mjs';
+import { getOpenAI } from '../utils/openai.mjs';
 
 /* -------- API key enforcement -------- */
 export function ensureOpenAIKey(explicitKey) {
@@ -13,7 +13,7 @@ export function ensureOpenAIKey(explicitKey) {
   const key = process.env.OPENAI_API_KEY;
   if (!key || !key.trim()) {
     throw new Error(
-      'Missing OpenAI API key. Provide --api-key or set OPENAI_API_KEY.'
+      'Missing OpenAI API key. Provide --api-key or set OPENAI_API_KEY.',
     );
   }
   return key;
@@ -78,7 +78,7 @@ export function validateConfig(config) {
     }
     if (!config.outputSchemas?.[agent.outputSchemaRef]) {
       throw new Error(
-        `Agent "${id}" references unknown schema "${agent.outputSchemaRef}"`
+        `Agent "${id}" references unknown schema "${agent.outputSchemaRef}"`,
       );
     }
   }
@@ -132,7 +132,7 @@ export function buildAgents(agentsConfig, mcpRegistry, outputSchemas) {
           base[t.ref].asTool({
             toolName: t.id || t.ref,
             toolDescription: t.description || `Tool for agent ${t.ref}`,
-          })
+          }),
         );
       }
     }
@@ -180,7 +180,7 @@ async function execAgentReviewer(
     maxTurns = 8,
     feedbackInjection = 'as_user',
     carryHistory = true,
-  }
+  },
 ) {
   let turn = 0,
     lastProposal = null,
@@ -229,7 +229,7 @@ export async function runFlow(config, userPrompt, opts = {}) {
   const agents = buildAgents(
     config.agents || {},
     mcpRegistry,
-    config.outputSchemas || {}
+    config.outputSchemas || {},
   );
 
   let history = [{ role: 'user', content: userPrompt }];
@@ -241,7 +241,7 @@ export async function runFlow(config, userPrompt, opts = {}) {
       const { finalOutput, history: h } = await execSingleAgent(
         agent,
         history,
-        step?.io?.carryHistory !== false
+        step?.io?.carryHistory !== false,
       );
       currentOutput = finalOutput;
       history = h;
@@ -257,7 +257,7 @@ export async function runFlow(config, userPrompt, opts = {}) {
           maxTurns: typeof step.maxTurns === 'number' ? step.maxTurns : 8,
           feedbackInjection: step.feedbackInjection || 'as_user',
           carryHistory: step?.io?.carryHistory !== false,
-        }
+        },
       );
       currentOutput = finalOutput;
       history = h;
@@ -271,7 +271,7 @@ export async function runFlow(config, userPrompt, opts = {}) {
   }
   if (typeof currentOutput === 'string') {
     throw new Error(
-      'Output must be an object with a required "result" property'
+      'Output must be an object with a required "result" property',
     );
   }
   if (!currentOutput.result) {
@@ -286,6 +286,7 @@ export async function runFlowWithFile(config, filePath, userPrompt, opts = {}) {
   validateConfig(config);
 
   // Initialize OpenAI client
+  const OpenAI = await getOpenAI();
   const client = new OpenAI({ apiKey });
 
   // Upload file to OpenAI
@@ -305,7 +306,7 @@ export async function runFlowWithFile(config, filePath, userPrompt, opts = {}) {
   const agents = buildAgents(
     config.agents || {},
     mcpRegistry,
-    config.outputSchemas || {}
+    config.outputSchemas || {},
   );
 
   // Create initial message with file and text
@@ -334,7 +335,7 @@ export async function runFlowWithFile(config, filePath, userPrompt, opts = {}) {
       const { finalOutput, history: h } = await execSingleAgent(
         agent,
         history,
-        step?.io?.carryHistory !== false
+        step?.io?.carryHistory !== false,
       );
       currentOutput = finalOutput;
       history = h;
@@ -350,7 +351,7 @@ export async function runFlowWithFile(config, filePath, userPrompt, opts = {}) {
           maxTurns: typeof step.maxTurns === 'number' ? step.maxTurns : 8,
           feedbackInjection: step.feedbackInjection || 'as_user',
           carryHistory: step?.io?.carryHistory !== false,
-        }
+        },
       );
       currentOutput = finalOutput;
       history = h;
@@ -365,7 +366,7 @@ export async function runFlowWithFile(config, filePath, userPrompt, opts = {}) {
       await client.files.del(file.id);
     } catch (error) {
       console.warn(
-        `Warning: Failed to delete uploaded file ${file.id}: ${error.message}`
+        `Warning: Failed to delete uploaded file ${file.id}: ${error.message}`,
       );
     }
   }
@@ -376,7 +377,7 @@ export async function runFlowWithFile(config, filePath, userPrompt, opts = {}) {
   }
   if (typeof currentOutput === 'string') {
     throw new Error(
-      'Output must be an object with a required "result" property'
+      'Output must be an object with a required "result" property',
     );
   }
   if (!currentOutput.result) {
@@ -395,20 +396,20 @@ export async function runFlowWithFileBuffer(
   fileBuffer,
   fileName,
   userPrompt,
-  opts = {}
+  opts = {},
 ) {
   const apiKey = ensureOpenAIKey(opts.apiKey);
   validateConfig(config);
 
   // Initialize OpenAI client
+  const OpenAI = await getOpenAI();
   const client = new OpenAI({ apiKey });
 
   // Upload file buffer to OpenAI
   let file;
   try {
     // Create a File object from buffer
-    const mimeType =
-      opts.mimeType ?? (mime.lookup(fileName) || 'application/octet-stream');
+    const mimeType = opts.mimeType ?? guessMimeType(fileName);
     const fileObj = new File([fileBuffer], fileName, { type: mimeType });
 
     file = await client.files.create({
@@ -424,7 +425,7 @@ export async function runFlowWithFileBuffer(
   const agents = buildAgents(
     config.agents || {},
     mcpRegistry,
-    config.outputSchemas || {}
+    config.outputSchemas || {},
   );
 
   // Create initial message with file and text
@@ -453,7 +454,7 @@ export async function runFlowWithFileBuffer(
       const { finalOutput, history: h } = await execSingleAgent(
         agent,
         history,
-        step?.io?.carryHistory !== false
+        step?.io?.carryHistory !== false,
       );
       currentOutput = finalOutput;
       history = h;
@@ -469,7 +470,7 @@ export async function runFlowWithFileBuffer(
           maxTurns: typeof step.maxTurns === 'number' ? step.maxTurns : 8,
           feedbackInjection: step.feedbackInjection || 'as_user',
           carryHistory: step?.io?.carryHistory !== false,
-        }
+        },
       );
       currentOutput = finalOutput;
       history = h;
@@ -484,7 +485,7 @@ export async function runFlowWithFileBuffer(
       await client.files.del(file.id);
     } catch (error) {
       console.warn(
-        `Warning: Failed to delete uploaded file ${file.id}: ${error.message}`
+        `Warning: Failed to delete uploaded file ${file.id}: ${error.message}`,
       );
     }
   }
@@ -495,7 +496,7 @@ export async function runFlowWithFileBuffer(
   }
   if (typeof currentOutput === 'string') {
     throw new Error(
-      'Output must be an object with a required "result" property'
+      'Output must be an object with a required "result" property',
     );
   }
   if (!currentOutput.result) {
