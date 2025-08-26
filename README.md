@@ -17,6 +17,7 @@
 - 🔄 **Multi-Agent Workflows**: Chain AI agents in sequence or review loops
 - 📋 **Structured Outputs**: Enforce JSON Schema for safe responses
 - 👀 **Agent Reviewer**: Add QA cycles where agents critique each other
+- 🎨 **Agent Colors**: Visual identification with hex, named, RGB, and HSL colors
 - 🖥️ **CLI & Interactive Mode**: Run configs directly from terminal
 - 🔧 **MCP Server Integration**: Stdio + HTTP support
 - 🛡 **System Validation**: API key, Node.js, deps checked before run
@@ -95,12 +96,41 @@ Example output:
   "agents": {
     "echo": {
       "name": "Echo Agent",
+      "color": "#FF5733",
       "instructions": "Repeat the user input inside the result property",
       "outputSchemaRef": "ResultString"
     }
   },
   "flow": {
     "steps": [{ "id": "step1", "type": "single_agent", "agentRef": "echo" }]
+  }
+}
+```
+
+### 🎨 Agent Colors
+
+Agents can be assigned colors for visual identification in workflows. Colors support multiple formats:
+
+- **Hex colors**: `#FF5733`, `#33FF57`
+- **Named colors**: `red`, `blue`, `green`, `yellow`, `purple`, `orange`, `pink`, `brown`, `gray`, `black`, `white`, `cyan`, `magenta`, `lime`, `navy`, `maroon`, `olive`, `teal`, `silver`, `gold`
+- **RGB values**: `rgb(255, 87, 51)` (values 0-255)
+- **HSL values**: `hsl(10, 100%, 60%)` (hue 0-360, saturation 0-100%, lightness 0-100%)
+
+```json
+{
+  "agents": {
+    "writer": {
+      "name": "Creative Writer",
+      "color": "#FF5733",
+      "instructions": "Write creative content",
+      "outputSchemaRef": "ResultString"
+    },
+    "reviewer": {
+      "name": "Content Reviewer",
+      "color": "blue",
+      "instructions": "Review and improve content",
+      "outputSchemaRef": "ResultString"
+    }
   }
 }
 ```
