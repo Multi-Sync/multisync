@@ -175,7 +175,7 @@ async function execAgentReviewer(
   reviewerAgent,
   history,
   {
-    passCondition = 'score == pass',
+    passCondition = 'score == "pass"',
     maxTurns = 8,
     feedbackInjection = 'as_user',
     carryHistory = true,
@@ -252,7 +252,7 @@ export async function runFlow(config, userPrompt, opts = {}) {
         reviewer,
         history,
         {
-          passCondition: step.passCondition || "score == 'pass'",
+          passCondition: step.passCondition || 'score == "pass"',
           maxTurns: typeof step.maxTurns === 'number' ? step.maxTurns : 8,
           feedbackInjection: step.feedbackInjection || 'as_user',
           carryHistory: step?.io?.carryHistory !== false,
@@ -345,7 +345,7 @@ export async function runFlowWithFile(config, filePath, userPrompt, opts = {}) {
         reviewer,
         history,
         {
-          passCondition: step.passCondition || "score == 'pass'",
+          passCondition: step.passCondition || 'score == "pass"',
           maxTurns: typeof step.maxTurns === 'number' ? step.maxTurns : 8,
           feedbackInjection: step.feedbackInjection || 'as_user',
           carryHistory: step?.io?.carryHistory !== false,
@@ -464,7 +464,7 @@ export async function runFlowWithFileBuffer(
         reviewer,
         history,
         {
-          passCondition: step.passCondition || "score == 'pass'",
+          passCondition: step.passCondition || 'score == "pass"',
           maxTurns: typeof step.maxTurns === 'number' ? step.maxTurns : 8,
           feedbackInjection: step.feedbackInjection || 'as_user',
           carryHistory: step?.io?.carryHistory !== false,
