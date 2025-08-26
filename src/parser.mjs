@@ -2,6 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import readline from 'node:readline/promises';
+import { fileURLToPath } from 'node:url';
 import { runFlow, validateConfig, ensureOpenAIKey } from './core.mjs';
 import { validateSystem } from './validator.mjs';
 
@@ -24,7 +25,20 @@ export async function runPromptLoop(config, { apiKey } = {}) {
 }
 
 export async function runParser(configPath, verbose = false, { apiKey } = {}) {
-  const configPathResolved = path.resolve(process.cwd(), configPath);
+  // Normalize configPath to a proper filesystem path.
+  // Handles cases where tests pass URL.pathname on Windows (e.g. "/D:/...").
+  let cfgPath = configPath;
+  try {
+    if (typeof cfgPath === 'string' && cfgPath.startsWith('file:')) {
+      cfgPath = fileURLToPath(new URL(cfgPath));
+    } else if (typeof cfgPath === 'string' && process.platform === 'win32' && /^\/[A-Za-z]:\//.test(cfgPath)) {
+      // Drop the leading slash from URL.pathname-style Windows paths
+      cfgPath = cfgPath.slice(1);
+    }
+  } catch {
+    // If any conversion fails, fall back to the original value
+  }
+  const configPathResolved = path.isAbsolute(cfgPath) ? cfgPath : path.resolve(process.cwd(), cfgPath);
   console.log('🚀 Starting multisync parser...');
   const validationPassed = await validateSystem(configPathResolved, { apiKey });
   if (!validationPassed) { process.exit(1); }
