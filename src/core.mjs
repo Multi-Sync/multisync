@@ -235,7 +235,20 @@ export async function runFlow(config, userPrompt, opts = {}) {
   let history = [{ role: 'user', content: userPrompt }];
   let currentOutput = null;
 
-  for (const step of config.flow.steps) {
+  if (opts.verbose) {
+    console.log(`🔍 Starting flow execution (${config.flow.steps.length} steps)...`);
+  }
+
+  for (const [index, step] of config.flow.steps.entries()) {
+    if (opts.verbose) {
+      const stepNum = index + 1;
+      if (step.type === 'single_agent') {
+        console.log(`📋 Step ${stepNum}/${config.flow.steps.length}: ${step.type} (agent: "${step.agentRef ?? "(none)"}")`);
+      } else if (step.type === 'agent_reviewer') {
+        console.log(`📋 Step ${stepNum}/${config.flow.steps.length}: ${step.type} (proposal: "${step.proposalAgentRef ?? '(unknown)'}", reviewer: "${step.reviewerAgentRef ?? '(unknown)'})"`);
+      }
+    }
+
     if (step.type === 'single_agent') {
       const agent = agents[step.agentRef];
       const { finalOutput, history: h } = await execSingleAgent(
@@ -264,6 +277,10 @@ export async function runFlow(config, userPrompt, opts = {}) {
     } else {
       throw new Error(`Unknown step type: ${step.type}`);
     }
+
+    if (opts.verbose) {
+      console.log(`✅ Step ${index + 1} completed`);
+    }
   }
 
   if (currentOutput === null) {
@@ -276,6 +293,9 @@ export async function runFlow(config, userPrompt, opts = {}) {
   }
   if (!currentOutput.result) {
     throw new Error('Output must include "result"');
+  }
+ if (opts.verbose) {
+    console.log('🎉 Flow execution completed successfully');
   }
   return currentOutput;
 }
