@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "multisync",
-  "version": "1.0.9",
+  "version": "1.0.10",
   "description": "Multi-agent workflow orchestrator for AI-powered task automation",
   "keywords": [
     "ai",
@@ -31,10 +31,10 @@
   "scripts": {
     "setup": "node src/cli.mjs --setup",
     "start": "node src/cli.mjs",
-    "test": "node --experimental-vm-modules ./node_modules/.bin/jest --forceExit --detectOpenHandles",
-    "test:watch": "node --experimental-vm-modules node_modules/.bin/jest --watch --forceExit",
-    "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage --forceExit --detectOpenHandles",
-    "test:ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --coverage --runInBand --testTimeout=30000",
+    "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --forceExit --detectOpenHandles",
+    "test:watch": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --watch --forceExit",
+    "test:coverage": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --coverage --forceExit --detectOpenHandles",
+    "test:ci": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js --ci --coverage --runInBand --testTimeout=30000",
     "lint": "eslint *.mjs tests/**/*.mjs",
     "lint:fix": "eslint *.mjs tests/**/*.mjs --fix",
     "format": "prettier --write *.mjs tests/**/*.mjs",
